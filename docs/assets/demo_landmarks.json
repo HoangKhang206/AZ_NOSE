@@ -1,0 +1,47 @@
+{
+  "_description": "Sample output MediaPipe Face Mesh cho ảnh chính diện. Dùng để test Module 2 (Geometric Analysis) mà không cần chạy MediaPipe thật. Giá trị đã normalize [0, 1].",
+  "_source": "TODO — chụp ảnh mẫu 1 người trong team + chạy MediaPipe local rồi export",
+  "_note": "File này chỉ chứa ~30 landmark quan trọng, KHÔNG phải full 468. Đủ để test tính góc/khoảng cách vùng mũi và mặt.",
+
+  "meta": {
+    "angle": "frontal",
+    "confidence": 0.92,
+    "imageWidth": 640,
+    "imageHeight": 480
+  },
+
+  "landmarks": {
+    "_convention": "Index theo MediaPipe Face Mesh chuẩn",
+
+    "nose_tip": { "index": 1, "x": 0.500, "y": 0.560, "z": -0.030 },
+    "nose_bridge_top": { "index": 6, "x": 0.500, "y": 0.420, "z": -0.020 },
+    "nose_bridge_mid": { "index": 168, "x": 0.500, "y": 0.480, "z": -0.025 },
+    "nose_bridge_high": { "index": 197, "x": 0.500, "y": 0.450, "z": -0.022 },
+    "nose_alar_left": { "index": 129, "x": 0.470, "y": 0.580, "z": -0.010 },
+    "nose_alar_right": { "index": 358, "x": 0.530, "y": 0.580, "z": -0.010 },
+
+    "upper_lip_top": { "index": 0, "x": 0.500, "y": 0.640, "z": -0.020 },
+    "lower_lip_bottom": { "index": 17, "x": 0.500, "y": 0.700, "z": -0.015 },
+
+    "left_eye_inner": { "index": 133, "x": 0.460, "y": 0.400, "z": -0.005 },
+    "left_eye_outer": { "index": 33, "x": 0.400, "y": 0.400, "z": 0.010 },
+    "right_eye_inner": { "index": 362, "x": 0.540, "y": 0.400, "z": -0.005 },
+    "right_eye_outer": { "index": 263, "x": 0.600, "y": 0.400, "z": 0.010 },
+
+    "forehead_center": { "index": 10, "x": 0.500, "y": 0.200, "z": 0.020 },
+    "chin_center": { "index": 152, "x": 0.500, "y": 0.850, "z": 0.030 },
+
+    "left_cheek": { "index": 234, "x": 0.350, "y": 0.550, "z": 0.050 },
+    "right_cheek": { "index": 454, "x": 0.650, "y": 0.550, "z": 0.050 }
+  },
+
+  "expected_measurements": {
+    "_note": "Kết quả đo bằng tay của bác sĩ trên ảnh gốc — dùng để verify Module 2 chạy đúng",
+    "nasolabialAngle": 92.5,
+    "nasofrontalAngle": 118.0,
+    "symmetryRatio": 1.15,
+    "faceProfile": "OVAL"
+  },
+
+  "recommended_shape_from_lookup": "S-line tự nhiên"
+}

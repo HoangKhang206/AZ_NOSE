@@ -1,0 +1,578 @@
+**AZ FACE INSIGHT**
+
+Web-App Phân tích Tỷ lệ Khuôn mặt
+
+& AI Tư vấn Cá nhân hoá
+
+*Tài liệu Mô tả Dự án **&** Phân rã Bài toán*
+
+Phiên bản 1.0
+
+Đơn vị: AZ NOSE
+
+Tháng 7 năm 2026
+
+# **Mục lục**
+
+*(Nhấn F9 trong Word để cập nhật mục lục sau khi mở tài liệu)*
+
+# **1. Tóm tắt điều hành**
+
+AZ Face Insight là một phân hệ được tích hợp trực tiếp vào website chính thức aznose.vn, cho phép khách hàng tự quét khuôn mặt bằng camera hoặc ảnh có sẵn, nhận báo cáo tỷ lệ khuôn mặt cá nhân hoá dựa trên chuẩn Á Đông do đội ngũ bác sĩ AZ NOSE thẩm định, và tiếp tục trò chuyện với một trợ lý AI đóng vai nhân viên tư vấn để tìm hiểu chi tiết trước khi quyết định đặt lịch chụp CT 3D miễn phí.
+
+Dự án được thiết kế xoay quanh ba trụ cột. Thứ nhất, tạo trải nghiệm cảm xúc mạnh thông qua công nghệ thực tế tăng cường (AR) nhẹ – vẽ đường viền dáng mũi đề xuất trực tiếp lên ảnh khách hàng. Thứ hai, tuân thủ pháp lý một cách chủ động thông qua xử lý ảnh cục bộ trên trình duyệt, đáp ứng Nghị định 13/2023/NĐ-CP về dữ liệu cá nhân. Thứ ba, đóng gói tri thức chuyên môn thật sự của bác sĩ vào AI thông qua kỹ thuật RAG (Retrieval-Augmented Generation), tránh việc AI tự bịa nội dung y khoa.
+
+Mục tiêu kinh doanh gồm ba nhóm chỉ tiêu: chuyển đổi traffic từ TikTok/Facebook thành lead chất lượng cao, giảm chi phí thu hút một lead so với quảng cáo truyền thống, và định vị AZ NOSE là phòng khám tiên phong ứng dụng AI có kiểm soát tại thị trường Việt Nam.
+
+## **Bối cảnh ra đời**
+
+Ngành thẩm mỹ mũi Việt Nam đang cạnh tranh gay gắt, chi phí thu hút khách hàng qua quảng cáo trả phí tăng đều mỗi năm. Trong khi đó, khách hàng trẻ (18-30 tuổi) có xu hướng nghiên cứu kỹ trên mạng trước khi đến phòng khám, và cảm giác e ngại việc trao đổi trực tiếp qua Zalo/Fanpage vì lo bị nhân viên bám dai. Do đó, cần một điểm chạm số hoạt động 24/7, cho phép khách hàng tự khám phá tỷ lệ khuôn mặt, tự đặt câu hỏi ẩn danh với AI, và tự chọn thời điểm liên hệ nhân viên thật khi đã thực sự sẵn sàng.
+
+# **2. Bối cảnh và Định nghĩa bài toán**
+
+## **2.1 Bài toán ban đầu (ill-defined)**
+
+"Làm thế nào để nhiều khách hàng biết đến AZ NOSE hơn và chủ động đến phòng khám tư vấn?"
+
+*Câu hỏi này quá rộng, không có tiêu chí đo lường cụ thể, không xác định được ràng buộc, và không dẫn tới quyết định thiết kế rõ ràng. Nó có thể trả lời bằng vô số cách khác nhau, từ chạy TVC truyền hình tới thuê KOLs, mỗi cách đòi hỏi bộ giải pháp hoàn toàn khác biệt.*
+
+## **2.2 Bài toán đã định nghĩa (well-defined)**
+
+Thiết kế một điểm chạm số nhúng trong website aznose.vn, hoạt động 24/7, có khả năng chuyển đổi khách hàng đến từ TikTok/Facebook (chủ yếu 18-30 tuổi, chủ yếu mobile) thành lead đặt lịch chụp CT 3D, trong các ràng buộc sau:
+
+- Không được đưa ra chẩn đoán y khoa cá nhân (tuân thủ Luật Khám bệnh, Chữa bệnh).
+
+- Không được lưu trữ dữ liệu sinh trắc học trên máy chủ (tuân thủ Nghị định 13/2023/NĐ-CP).
+
+- Chi phí vận hành hàng tháng dưới 500.000 VND cho bản MVP.
+
+- Không phụ thuộc vào nhân viên trực chat, có khả năng chạy song song với đội sales hiện tại.
+
+- Có khả năng thu thập insight khách hàng để phục vụ marketing và đào tạo sales.
+
+## **2.3 Giả định (Assumptions)**
+
+- Traffic chủ yếu đến từ mobile, tỷ lệ khoảng 85-90%.
+
+- Khách hàng mục tiêu chưa quen với việc chủ động đăng ký chụp CT 3D và cần một bước trung gian.
+
+- Đội ngũ bác sĩ AZ NOSE sẵn sàng dành thời gian (khoảng 3 buổi × 2 giờ) để cung cấp tri thức chuyên môn.
+
+- Có ít nhất một developer full-stack có kinh nghiệm với web modern có thể triển khai.
+
+- Website aznose.vn hiện tại có khả năng nhúng phân hệ mới hoặc iframe.
+
+## **2.4 Ràng buộc pháp lý cần đặc biệt lưu ý**
+
+- Nghị định 13/2023/NĐ-CP về bảo vệ dữ liệu cá nhân: ảnh khuôn mặt và landmark 3D được coi là dữ liệu sinh trắc học nhạy cảm, cần consent minh bạch.
+
+- Luật Quảng cáo 2012 (sửa đổi 2018): cấm cam kết kết quả trong quảng cáo dịch vụ y tế, thẩm mỹ.
+
+- Luật Khám bệnh, Chữa bệnh 2023: chỉ bác sĩ có chứng chỉ hành nghề mới được chẩn đoán.
+
+- Thông tư 09/2015/TT-BYT về hoạt động quảng cáo trong lĩnh vực y tế.
+
+## **2.5 Tiêu chí thành công (Success Criteria)**
+
+Sau 3 tháng kể từ khi go-live, MVP được coi là thành công nếu đạt các mốc:
+
+- Tỷ lệ khách hoàn thành đủ 3 bước upload → xem kết quả ≥ 30%.
+
+- Tỷ lệ khách bắt chuyện với chatbot sau khi xem kết quả ≥ 20%.
+
+- Tỷ lệ chuyển đổi thành lead đặt lịch ≥ 5% trên tổng traffic vào phân hệ.
+
+- Không có vụ khiếu nại nào về nội dung do AI sinh ra trong 3 tháng đầu.
+
+- Chi phí trung bình mỗi lead giảm ít nhất 30% so với kênh quảng cáo hiện tại.
+
+# **3. Bản đồ các bên liên quan (Stakeholder Mapping)**
+
+Việc xác định rõ các bên liên quan giúp đảm bảo mọi nhu cầu và ràng buộc đều được cân nhắc trong thiết kế. Các bên được chia theo mức độ ảnh hưởng và mức độ quan tâm.
+
+| **Bên liên quan** | **Vai trò** | **Nhu cầu chính** | **Ảnh hưởng** |
+| --- | --- | --- | --- |
+| Ban giám đốc AZ NOSE | Chủ dự án, phê duyệt ngân sách | ROI rõ ràng, tăng doanh thu, hình ảnh thương hiệu tốt | Rất cao |
+| Bác sĩ AZ NOSE | Cung cấp tri thức chuyên môn | Nội dung đúng y đức, không bị AI làm giả danh tính, được ghi công | Rất cao |
+| Đội Sales | Nhận và chốt lead từ chatbot | Lead chất lượng có context sẵn, không bị spam | Cao |
+| Khách hàng (18-30, mobile) | Người sử dụng cuối | Trải nghiệm mượt, riêng tư, thông tin trung thực, không bị ép | Rất cao |
+| Đội Marketing | Truyền thông và thu hút traffic | Có material chia sẻ, dữ liệu insight khách hàng | Trung bình |
+| Đội Dev / triển khai | Xây dựng và vận hành | Spec rõ ràng, ổn định, không thay đổi liên tục | Cao |
+| Luật sư / Compliance | Giám sát tuân thủ | Consent chuẩn, không cam kết y khoa, có kill switch | Cao |
+| Cơ quan quản lý | Giám sát pháp lý bên ngoài | Tuân thủ Nghị định 13, Luật Quảng cáo, Luật Khám chữa bệnh | Rất cao |
+| Đối thủ cạnh tranh | Không trực tiếp tham gia | Có thể copy giao diện nhưng không copy được kho tri thức | Gián tiếp |
+
+# **4. Mô tả sản phẩm chi tiết**
+
+Sản phẩm được thiết kế theo cách tiếp cận mobile-first, do 85-90% traffic đến từ điện thoại. Trên desktop, các thành phần vẫn giữ nguyên logic nhưng được tái sắp xếp theo hai cột dọc để tận dụng không gian màn hình rộng.
+
+## **4.1 Điểm vào (Entry Point)**
+
+- Bổ sung tab mới có tên "Phân tích khuôn mặt" trên thanh navigation của aznose.vn, đặt ngay cạnh tab "Nâng mũi".
+
+- Khi khách hàng nhấn vào, trang cuộn mượt (smooth scroll) xuống phân hệ nằm ngay dưới banner chính, không chuyển sang URL khác để giữ được authority tên miền và uy tín thương hiệu.
+
+- Vùng intro của phân hệ hiển thị badge "Riêng tư – Miễn phí" và mô tả ngắn 30 giây để xây trust ngay lập tức.
+
+## **4.2 Vùng nhập liệu (Input Zone)**
+
+- Ba ô hình chữ nhật viền nét đứt tương ứng ba góc chụp: chính diện, nghiêng 45°, nghiêng 90°. Ô đầu tiên được highlight màu cam để dẫn dắt thứ tự thao tác.
+
+- Nút "Chụp trực tiếp" bật camera trình duyệt qua Web Camera API, kèm khung mặt overlay dạng SVG để hướng dẫn khách hàng chụp đúng góc.
+
+- Bộ kiểm tra chất lượng ảnh tự động: kiểm tra độ sáng, độ sắc nét (dùng Laplacian variance), sự hiện diện của khuôn mặt trong khung. Nếu ảnh không đạt, hệ thống nhắc chụp lại trước khi cho tiếp tục.
+
+- Ô đồng thuận bắt buộc: "Ảnh của tôi được xử lý ngay trên trình duyệt, không tải lên máy chủ. Tôi trên 18 tuổi." – bắt buộc tick trước khi bấm nút "Bắt đầu phân tích".
+
+## **4.3 Màn hình xử lý (Processing Screen)**
+
+- Hiển thị chính ảnh khách hàng vừa upload, phóng to vào khung mặt.
+
+- MediaPipe Face Mesh chạy client-side, rải 468 điểm neo màu cam nhỏ trực tiếp lên ảnh.
+
+- Hai đường đo chạy động: trục dọc khuôn mặt (từ trán qua sống mũi tới cằm) và trục ngang cánh mũi.
+
+- Thanh tiến độ và text chạy động thay đổi mỗi 2 giây: "Đang đo góc mũi môi…", "Đang đánh giá tỷ lệ 1/3 khuôn mặt…", "Đang so sánh với chuẩn Á Đông…".
+
+- Ghi chú nhỏ ở đáy: "Ảnh không rời khỏi máy bạn" – kèm biểu tượng ổ khoá để tái khẳng định cam kết bảo mật.
+
+- Thời gian xử lý tổng cộng khoảng 3-5 giây tuỳ cấu hình máy.
+
+## **4.4 Bảng kết quả (Dashboard Output)**
+
+Đây là màn hình cốt lõi, nơi tạo ra cảm xúc "wow" và thúc đẩy hành động đặt lịch. Bố cục:
+
+### **Trên mobile (dọc một cột)**
+
+- Ảnh Before/After với thanh trượt ◀▶: bên trái là ảnh gốc của khách hàng, bên phải là chính ảnh đó nhưng có đường viền dáng mũi đề xuất được vẽ chồng lên bằng công nghệ AR silhouette.
+
+- Watermark cố định trên ảnh: "Hình mô phỏng – kết quả thực tế có thể khác biệt".
+
+- Bộ ba nút nhỏ chuyển đổi giữa 3 góc chụp (chính diện, 45°, 90°).
+
+- Nhóm 2-3 metric card: Góc mũi môi, Góc mũi trán, Tính đối xứng – mỗi card hiển thị số hiện tại, dải chuẩn Á Đông, và biểu tượng cảnh báo nếu lệch chuẩn.
+
+- Đoạn text tư vấn cá nhân hoá 3-4 câu do AI sinh ra thông qua RAG (chi tiết ở phần kiến trúc kỹ thuật).
+
+- Card đề xuất dáng mũi phù hợp nhất, 1-2 dáng được bôi đậm với ảnh minh hoạ và mô tả ngắn.
+
+- Mục "Case tương tự bạn" ở dưới cùng: hiển thị Before/After thật của khách hàng cũ AZ NOSE có cấu trúc mặt gần giống (đã có consent, đã ẩn danh).
+
+### **Trên desktop (hai cột dọc)**
+
+- Cột trái: khu vực ảnh với Before/After slider và bộ chuyển góc chụp.
+
+- Cột phải: metric cards, đoạn text tư vấn, và đề xuất dáng mũi.
+
+- Case tương tự đặt bên dưới, chiếm hết chiều ngang.
+
+## **4.5 Chatbot Trợ lý Tư vấn (AI thứ hai)**
+
+- Xuất hiện dưới dạng bong bóng chat ở góc phải màn hình sau khi khách hàng đã tương tác xong với dashboard (khoảng 15-30 giây), không ngắt mạch cảm xúc khi đang xem Before/After.
+
+- Đóng vai "Trợ lý AZ NOSE" có tên nhân cách hoá (ví dụ: "Ngọc"), avatar dễ mến, nhưng minh bạch tuyên bố là AI ngay lời chào.
+
+- Câu chào mở đầu cá nhân hoá dựa trên kết quả vừa quét, không bắt khách kể lại: "Chào bạn! Mình thấy bạn vừa quét và AI đề xuất dáng S-line tự nhiên. Bạn muốn tìm hiểu thêm về dáng này, hay có câu hỏi khác?"
+
+- Bốn nút quick reply với các câu hỏi phổ biến: giá, đau không, thời gian hồi phục, xem case tương tự.
+
+- Trả lời bằng text kết hợp product card khi phù hợp (ảnh, giá tham khảo, ưu đãi thật).
+
+- Cơ chế handoff sang nhân viên thật khi phát hiện intent phức tạp: đặt lịch cụ thể, phàn nàn, câu hỏi y khoa chuyên sâu, hoặc khi AI trả lời không thoả đáng 2 lần liên tiếp.
+
+## **4.6 CTA Đặt lịch, Chia sẻ và Lưu kết quả**
+
+- Sau khi khách chat được vài lượt hoặc sau khi xem xong dashboard trong 45 giây, một popup nhỏ hình chuông trồi lên: "Sẵn sàng gặp bác sĩ chưa? Đặt lịch chụp CT 3D miễn phí – xem cấu trúc sụn thật bên trong."
+
+- Nút chính: dẫn thẳng vào chức năng đặt lịch có sẵn của aznose.vn, đồng thời data khách hàng được đẩy về CRM/Google Sheets.
+
+- Nút phụ "Chia sẻ kết quả": tạo một shareable card định dạng 9:16 (sẵn sàng đăng TikTok/IG Story) với các chỉ số tỷ lệ và logo AZ NOSE, không kèm ảnh mặt khách.
+
+- Nút phụ "Lưu về máy": tải file PDF hoặc PNG kết quả về thiết bị của khách hàng.
+
+# **5. Kiến trúc kỹ thuật**
+
+## **5.1 Nguyên tắc thiết kế**
+
+- Client-first: 95% xử lý diễn ra trực tiếp trên trình duyệt khách hàng, backend chỉ đóng vai trò proxy cho LLM API và ghi log tối thiểu.
+
+- Free-tier friendly: mọi thành phần đều có phương án miễn phí hoặc chi phí thấp cho MVP, tránh khoá cứng vào nhà cung cấp đắt tiền.
+
+- Modular: mỗi module (upload, đo lường, AI phân tích, AI tư vấn, AR overlay) có thể thay thế độc lập mà không phá vỡ hệ thống.
+
+- Explainable: mọi output của AI đều truy vết được về đoạn tài liệu chuyên môn của bác sĩ, đảm bảo có thể giải trình khi cần.
+
+- Fail-safe: mọi khâu AI đều có template fallback để không bao giờ hiển thị màn hình trắng cho khách hàng.
+
+## **5.2 Pipeline xử lý ảnh**
+
+Quy trình xử lý một ảnh từ khi upload đến khi có số liệu:
+
+- Bước 1: Preprocessing – kiểm tra chất lượng, chuẩn hoá kích thước và hướng ảnh.
+
+- Bước 2: MediaPipe Face Mesh (thư viện JavaScript, chạy client-side) phát hiện khuôn mặt và ánh xạ 468 điểm neo với tọa độ ba chiều (x, y, z).
+
+- Bước 3: Tính toán hình học bằng công thức khoảng cách Euclidean và định lý hàm cos, cho ra ba chỉ số cốt lõi: góc mũi môi (Nasolabial), góc mũi trán (Nasofrontal), và tỷ lệ đối xứng.
+
+- Bước 4: So sánh với bảng chuẩn Á Đông (do bác sĩ AZ NOSE cung cấp và chuẩn hoá).
+
+- Bước 5: Phân loại cấu trúc khuôn mặt (mặt tròn/dài/vuông kết hợp với dáng mũi hiện tại).
+
+## **5.3 Kiến trúc AI hai tầng (Dual-RAG)**
+
+Đây là điểm khác biệt cốt lõi của dự án. Thay vì dùng một LLM đa năng làm mọi việc (rủi ro ảo giác cao), hệ thống tách thành hai AI với hai kho tri thức riêng biệt, mỗi AI đảm nhận một vai trò chuyên biệt.
+
+### **AI thứ nhất – Chuyên gia phân tích**
+
+- Nhiệm vụ: sinh đoạn text đánh giá cá nhân hoá 3-4 câu dựa trên số liệu đo được.
+
+- Model: Gemini 1.5 Flash (free tier 1M tokens/ngày) hoặc Groq Llama 3.3 (free tier khá rộng).
+
+- Kho tri thức: tài liệu chuyên môn y khoa do bác sĩ AZ NOSE cung cấp, bao gồm chuẩn tỷ lệ Á Đông, nguyên tắc đề xuất dáng mũi, các cảnh báo và chống chỉ định, ngôn ngữ tư vấn chuẩn không phán xét.
+
+- Guardrails: layer kiểm duyệt regex chặn các từ cấm như "chắc chắn", "cam kết", "chữa khỏi", "100%", "không đau". Nếu output vi phạm, hệ thống fallback sang template có sẵn.
+
+### **AI thứ hai – Trợ lý tư vấn kinh doanh**
+
+- Nhiệm vụ: chat với khách hàng, giới thiệu dịch vụ, giải đáp câu hỏi, dẫn tới đặt lịch.
+
+- Model: cùng Gemini/Groq nhưng dùng system prompt và kho tri thức hoàn toàn khác.
+
+- Kho tri thức: bộ FAQ ít nhất 50-100 câu, danh mục dịch vụ chi tiết, case study ẩn danh, chính sách bảo hành và thanh toán, playbook xử lý tình huống nhạy cảm.
+
+- State management: lưu lại 5-10 lượt hội thoại gần nhất trong bộ nhớ session để duy trì ngữ cảnh.
+
+- Handoff logic: phát hiện intent qua từ khoá và mẫu câu, chuyển sang CRM/Zalo khi cần.
+
+## **5.4 Công nghệ AR Silhouette Overlay**
+
+Dự án chọn phương án AR ở mức trung gian – Cấp độ 2 (vẽ đường viền dáng mũi đề xuất chồng lên ảnh thật của khách hàng), thay vì Cấp độ 3 (biến đổi thật hình dáng mũi). Lý do và cơ chế:
+
+- Không biến đổi ảnh gốc: giữ tính trung thực, tránh rủi ro pháp lý về quảng cáo gây hiểu nhầm kết quả y khoa.
+
+- Dựa vào các landmark mũi mà MediaPipe cung cấp sẵn (khoảng 10-15 điểm quanh vùng mũi) để xác định vị trí và kích thước tham chiếu.
+
+- Vẽ đường viền dáng mũi đề xuất bằng SVG path trên một canvas layer nằm phía trên ảnh gốc.
+
+- Thư viện template đường viền: khoảng 7-10 dáng mũi phổ biến của AZ NOSE (S-line, L-line, S-line Hàn Quốc…) × 3 góc chụp = 21-30 template SVG do team thiết kế phối hợp với bác sĩ tạo ra.
+
+- Opacity đường viền khoảng 70%, màu cam hoặc trắng tuỳ nền, kèm watermark cố định để đảm bảo minh bạch.
+
+## **5.5 Hạ tầng và stack đề xuất**
+
+- Frontend: Next.js hoặc React SPA thuần, hosting tĩnh trên Vercel/Cloudflare Pages (free tier đủ cho hàng nghìn user/tháng).
+
+- MediaPipe: load qua CDN của Google, không cần host lại.
+
+- Backend nhẹ: một vài Serverless Functions (Vercel Functions hoặc Cloudflare Workers, cả hai đều có free tier) chỉ để proxy LLM API (bảo vệ API key) và ghi log tối thiểu.
+
+- LLM API: Gemini 1.5 Flash / Groq / OpenRouter tuỳ tình huống, có cơ chế fallback giữa các nhà cung cấp.
+
+- Lead storage: giai đoạn MVP dùng Google Sheets API + Zapier free tier, sau đó chuyển sang CRM chính của AZ NOSE.
+
+- Analytics: Google Analytics 4 + Meta Pixel + Microsoft Clarity (tất cả đều free).
+
+# **6. Yêu cầu chức năng (MoSCoW)**
+
+Danh sách yêu cầu được phân loại theo bốn nhóm ưu tiên MoSCoW, giúp team dev tập trung đúng vào những gì cần thiết cho MVP và tránh phân tán nguồn lực.
+
+## **6.1 Must have – bắt buộc phải có**
+
+Nếu thiếu bất kỳ mục nào bên dưới, sản phẩm coi như thất bại và không thể ra mắt:
+
+- Upload hoặc chụp trực tiếp 3 ảnh ở 3 góc chuẩn.
+
+- MediaPipe rải landmark chính xác trên ảnh thật của khách hàng.
+
+- Tính toán ba chỉ số cốt lõi và so với chuẩn Á Đông.
+
+- Popup consent minh bạch và kiểm tra độ tuổi trên 18.
+
+- Toàn bộ xử lý ảnh diễn ra client-side, không upload ảnh lên server.
+
+- Đoạn text kết quả – dùng template hoặc RAG đều được, miễn không bịa.
+
+- CTA đặt lịch dẫn đến flow đặt lịch có sẵn của aznose.vn.
+
+- Giao diện responsive, ưu tiên mobile trước.
+
+- Tracking cơ bản với Google Analytics 4.
+
+## **6.2 Should have – nên có trong MVP**
+
+Các yếu tố quan trọng nhưng nếu thiếu, sản phẩm vẫn có thể ra mắt được:
+
+- AR silhouette overlay (Cấp độ 2) với Before/After slider.
+
+- Chatbot AI thứ hai với kho tri thức kinh doanh cơ bản.
+
+- Shareable result card để phục vụ viral loop trên TikTok/Facebook.
+
+- Meta Pixel để phục vụ retargeting.
+
+- Cơ chế handoff sang Zalo/Messenger cho các câu hỏi phức tạp.
+
+- Case tương tự (Before/After của khách hàng cũ).
+
+## **6.3 Could have – có thời gian thì làm**
+
+Các yếu tố tăng giá trị nhưng có thể dời sang bản v1.1:
+
+- Đa ngôn ngữ (Tiếng Anh và Tiếng Hàn cho khách du lịch chữa bệnh).
+
+- Video ngắn của bác sĩ AZ NOSE giải thích ý nghĩa kết quả.
+
+- Referral tracking (link giới thiệu riêng cho từng khách).
+
+- Voice input cho chatbot.
+
+- Đặt lịch inline không cần chuyển trang.
+
+- Chế độ so sánh nhiều dáng mũi cùng lúc.
+
+## **6.4 Won****'****t have – MVP không làm**
+
+Rõ ràng loại trừ để tránh scope creep:
+
+- AR 3D photo-realistic biến đổi thật khuôn mặt (Cấp độ 3) – dời sang bản v2.0 nếu MVP thành công.
+
+- Ứng dụng native iOS/Android – dùng web app đủ cho traffic từ mạng xã hội.
+
+- Tự huấn luyện model AI – chi phí và thời gian không cần thiết cho MVP.
+
+- Tích hợp CRM full-scale ngay – dùng Google Sheets tạm thời.
+
+- Chức năng thanh toán/đặt cọc inline.
+
+# **7. Phân rã bài toán (Problem Decomposition)**
+
+Bài toán tổng thể được phân rã theo ba hướng khác nhau, mỗi hướng phục vụ một mục đích: theo module chức năng (dành cho phân công công việc), theo bản chất tính toán (dành cho đánh giá năng lực kỹ thuật cần có), và theo giai đoạn triển khai (dành cho lập kế hoạch).
+
+## **7.1 Phân rã theo module chức năng**
+
+Sáu module chức năng, mỗi module có thể được giao cho một cá nhân hoặc nhóm nhỏ chịu trách nhiệm:
+
+### **Module A – Frontend và Trải nghiệm người dùng**
+
+- A1. Tích hợp điểm vào và điều hướng smooth-scroll trong aznose.vn.
+
+- A2. Vùng nhập liệu bao gồm upload, camera, và kiểm tra chất lượng ảnh.
+
+- A3. Popup consent và kiểm tra độ tuổi.
+
+- A4. Hiệu ứng animation cho màn hình xử lý (rải landmark, đường đo, text chạy).
+
+- A5. Bảng kết quả với hai layout riêng cho mobile và desktop.
+
+- A6. Giao diện chatbot bao gồm bong bóng chat, typing indicator, quick replies, product card.
+
+- A7. Popup CTA và shareable result card.
+
+- A8. Bộ chuyển đổi giữa 3 góc chụp trên bảng kết quả.
+
+### **Module B – Xử lý ảnh và Đo lường**
+
+- B1. Validator kiểm tra chất lượng ảnh (độ sáng, độ nét, sự hiện diện của khuôn mặt).
+
+- B2. Tích hợp MediaPipe Face Mesh vào pipeline.
+
+- B3. Trích xuất tọa độ 468 điểm neo và các nhóm landmark quan trọng.
+
+- B4. Tính toán hình học: khoảng cách Euclidean, định lý hàm cos, các chỉ số phái sinh.
+
+- B5. So sánh với bảng chuẩn Á Đông và phân loại độ lệch.
+
+- B6. Phân loại cấu trúc khuôn mặt tổng hợp.
+
+### **Module C – AI Phân tích (AI thứ nhất)**
+
+- C1. Thiết kế cấu trúc kho tri thức chuyên môn (đầu vào chính là bác sĩ).
+
+- C2. Xây dựng prompt template và bộ guardrails.
+
+- C3. Tích hợp LLM API và cơ chế fallback giữa nhà cung cấp.
+
+- C4. Validation output và fallback về template có sẵn khi vi phạm.
+
+- C5. Framework A/B testing cho các phiên bản prompt khác nhau.
+
+### **Module D – AI Tư vấn (AI thứ hai)**
+
+- D1. Thiết kế cấu trúc kho tri thức kinh doanh.
+
+- D2. Quản lý trạng thái hội thoại và context memory.
+
+- D3. Phân loại intent (câu hỏi, đặt lịch, phàn nàn, cần escalate).
+
+- D4. Hiển thị product card trong luồng chat.
+
+- D5. Cơ chế handoff sang nhân viên thật thông qua CRM/Zalo.
+
+- D6. Pipeline phân tích log chat để cải thiện knowledge base.
+
+### **Module E – AR Silhouette Overlay**
+
+- E1. Xác định landmark mũi cụ thể cho mỗi góc chụp.
+
+- E2. Xây dựng thư viện template silhouette (7-10 dáng mũi × 3 góc).
+
+- E3. Rendering đường viền lên canvas layer trên ảnh gốc.
+
+- E4. Điều khiển Before/After slider.
+
+- E5. Watermark cố định và disclaimer.
+
+### **Module F – Tích hợp và Vận hành**
+
+- F1. Đẩy lead sang CRM hoặc Google Sheets.
+
+- F2. Thiết lập analytics (Google Analytics 4, Meta Pixel, Microsoft Clarity).
+
+- F3. Layer kiểm duyệt nội dung tự động.
+
+- F4. Tuân thủ pháp lý: consent log, terms of service, privacy policy.
+
+- F5. Monitoring, alerting, và kill switch trong trường hợp sự cố.
+
+## **7.2 Phân rã theo bản chất tính toán**
+
+Phân loại các thành phần theo bản chất kỹ thuật giúp đánh giá năng lực team cần có và ước lượng độ khó tổng thể.
+
+| **Loại tính toán** | **Module thuộc về** | **Độ khó** | **Yêu cầu năng lực** |
+| --- | --- | --- | --- |
+| Xử lý sự kiện UI, upload, validation | A2, A3, B1 | Thấp - Trung | Frontend developer trung cấp |
+| Chạy pre-trained deep learning model | B2, B3 | Thấp | Đọc được doc thư viện, không cần biết ML |
+| Tính toán hình học và toán học | B4, B5, B6 | Thấp | Toán lượng giác lớp 10 |
+| Generative AI có kiểm soát (RAG) | C, D | Trung - Cao | Kinh nghiệm prompt engineering, tư duy an toàn |
+| Đồ hoạ 2D trên Canvas/SVG | E | Trung | Hiểu tọa độ và transform trong đồ hoạ |
+| Tích hợp API và hệ thống | F | Thấp - Trung | Kinh nghiệm backend cơ bản, chú ý bảo mật |
+| Soạn nội dung chuyên môn (không code) | C1, D1, E2 | Cao (về tổ chức) | Bác sĩ AZ NOSE + biên tập viên |
+
+**Nhận xét quan trọng: bottleneck lớn nhất của dự án KHÔNG phải là code, mà là công đoạn soạn nội dung chuyên môn của bác sĩ. Nếu không có kho tri thức chất lượng cao, cả hai AI đều sẽ trả về kết quả sơ sài bất kể code có xịn đến đâu.**
+
+## **7.3 Phân rã theo giai đoạn triển khai**
+
+Chia thành các giai đoạn có sản phẩm chạy được ở mỗi cột mốc, tuân thủ nguyên tắc "crawl → walk → run".
+
+### **Giai đoạn 0 – Chuẩn bị nền tảng**
+
+- Chốt scope, ngân sách, timeline và team.
+
+- Luật sư draft consent, terms of service, privacy policy.
+
+- Bác sĩ AZ NOSE dành 3 buổi × 2 giờ để soạn kho tri thức chuyên môn cốt lõi (khoảng 30-50 case).
+
+- Đội marketing soạn kho tri thức kinh doanh (FAQ, danh mục dịch vụ, case study).
+
+### **Giai đoạn 1 – Pipeline cốt lõi**
+
+- Dựng frontend skeleton và điểm vào.
+
+- Tích hợp MediaPipe và pipeline đo lường (Module B toàn bộ).
+
+- Bảng kết quả với template fallback text (chưa có AI).
+
+- Kết thúc giai đoạn: có sản phẩm chạy được, đủ để validate concept ban đầu.
+
+### **Giai đoạn 2 – Nâng cấp AI phân tích**
+
+- Tích hợp AI thứ nhất với kho tri thức của bác sĩ.
+
+- Xây dựng layer guardrails và fallback.
+
+- A/B test giữa template và AI để đánh giá cải thiện.
+
+### **Giai đoạn 3 – AR Silhouette Overlay**
+
+- Xây dựng thư viện template silhouette cho 7-10 dáng mũi × 3 góc.
+
+- Rendering canvas và Before/After slider.
+
+- Bộ chuyển đổi giữa 3 góc chụp.
+
+### **Giai đoạn 4 – Chatbot tư vấn**
+
+- Tích hợp AI thứ hai với kho tri thức kinh doanh.
+
+- Giao diện chat, quick replies, product card.
+
+- Cơ chế handoff sang sales.
+
+### **Giai đoạn 5 – Soft launch và tinh chỉnh**
+
+- QA nội bộ với 50 users thật (nhân viên, bạn bè, khách hàng thân).
+
+- Fix bug, tối ưu tốc độ, kiểm tra trên nhiều thiết bị.
+
+- Thiết lập monitoring và kill switch.
+
+### **Giai đoạn 6 – Public launch và lặp lại**
+
+- Ra mắt chính thức kèm chiến dịch TikTok/Facebook.
+
+- Đọc log hàng tuần để mở rộng kho tri thức.
+
+- A/B test liên tục các phần tử conversion quan trọng.
+
+# **8. Rủi ro và Đối phó**
+
+Bảng rủi ro được xây dựng theo phương pháp Impact × Probability. Các rủi ro được sắp xếp từ nghiêm trọng nhất đến nhẹ nhất.
+
+| **Rủi ro** | **Xác suất** | **Tác động** | **Phương án đối phó** |
+| --- | --- | --- | --- |
+| AI sinh nội dung sai hoặc bịa thông tin (ảo giác) | Cao | Rất cao | Guardrails regex + RAG cứng + human review ngẫu nhiên hàng tuần |
+| Bị Bộ Y tế / Cục QLTT xử lý vì vi phạm quảng cáo | Trung bình | Rất cao | Luật sư review nội dung, disclaimer rõ, không cam kết kết quả |
+| Vi phạm Nghị định 13 về dữ liệu sinh trắc học | Trung bình | Cao | Xử lý client-side, consent minh bạch, không lưu ảnh |
+| Bác sĩ không có đủ thời gian soạn tri thức | Cao | Cao | Đặt lịch cứng, ghi âm rồi transcribe, có editor hỗ trợ |
+| Chatbot bị prompt injection tấn công | Trung bình | Cao | System prompt phòng thủ, moderation layer, log toàn bộ |
+| Screenshot AI trả lời tệ lan truyền tiêu cực | Thấp | Cao | Test trước launch với 100+ câu khó, có nút feedback thu về |
+| MediaPipe lag trên điện thoại yếu, mạng kém | Cao | Trung bình | Chạy Web Worker, giảm số landmark render, có fallback |
+| Khách hàng cảm thấy bị chấm điểm ngoại hình (BDD) | Trung bình | Trung bình | Ngôn ngữ khuyến khích, không phán xét, có option ẩn kết quả |
+| Chi phí LLM vượt ngoài free tier | Thấp (MVP) | Trung bình | Monitor daily, có kill switch, fallback về template |
+| Đối thủ copy giao diện | Cao | Thấp | Moat thực sự là kho tri thức của bác sĩ, không copy được |
+
+# **9. Lộ trình triển khai MVP**
+
+Lộ trình được thiết kế theo nguyên tắc mỗi giai đoạn kết thúc phải có sản phẩm chạy được, không phải đến cuối mới release. Điều này cho phép validate sớm và cắt lỗ nếu cần.
+
+| **Giai đoạn** | **Kết quả bàn giao** | **Milestone kiểm chứng** |
+| --- | --- | --- |
+| 0. Chuẩn bị | Consent, terms, kho tri thức cốt lõi của bác sĩ và marketing | Luật sư phê duyệt tài liệu |
+| 1. Pipeline cốt lõi | Web-app chạy được với template text, không có AI | 5 users thử nghiệm hoàn thành flow không lỗi |
+| 2. AI phân tích | AI thứ nhất tích hợp với RAG, có guardrails | A/B test cho thấy AI tốt hơn template ít nhất 20% |
+| 3. AR Silhouette | Before/After slider hoạt động trên 3 góc | 10 users thử, feedback UX ≥ 4/5 |
+| 4. Chatbot tư vấn | AI thứ hai hoạt động, handoff sang sales | 80% câu hỏi phổ biến được trả lời chính xác |
+| 5. Soft launch | 50 users thật đã dùng, bug đã fix | Không lỗi nghiêm trọng trong 1 tuần |
+| 6. Public launch | Ra mắt chính thức + chiến dịch marketing | Đạt các KPI đã đặt trong 3 tháng |
+
+# **Phụ lục A – Bảng thuật ngữ**
+
+Bảng thuật ngữ dành cho các bên không chuyên về kỹ thuật (bác sĩ, sales, luật sư) khi đọc tài liệu này.
+
+| **Thuật ngữ** | **Giải thích ngắn gọn** |
+| --- | --- |
+| MediaPipe Face Mesh | Thư viện AI miễn phí của Google, nhận diện 468 điểm neo trên khuôn mặt trong ảnh |
+| Landmark | Điểm neo, tọa độ cụ thể trên khuôn mặt (khoé mắt, chóp mũi, mép môi…) |
+| Nasolabial Angle | Góc mũi môi, tạo bởi trục sống mũi và trục môi trên |
+| Nasofrontal Angle | Góc mũi trán, tạo bởi trục sống mũi và trục trán |
+| RAG | Retrieval-Augmented Generation – kỹ thuật giúp AI chỉ nói dựa trên kho tri thức được cung cấp, không tự bịa |
+| LLM | Large Language Model – mô hình ngôn ngữ lớn như GPT, Gemini, Claude |
+| Silhouette Overlay | Kỹ thuật vẽ đường viền lên ảnh mà không thay đổi ảnh gốc |
+| Handoff | Chuyển giao khách hàng từ AI sang nhân viên thật khi cần |
+| Prompt Injection | Kỹ thuật tấn công AI bằng cách gõ câu lệnh giả để lừa AI làm việc trái ý |
+| Guardrails | Lớp bảo vệ đặt trước và sau AI để đảm bảo không sinh nội dung bị cấm |
+| Client-side | Xử lý diễn ra trên máy khách hàng (trình duyệt), không gửi lên máy chủ |
+| MoSCoW | Phân loại yêu cầu theo bốn mức: Must / Should / Could / Won't have |
+| Nghị định 13/2023 | Nghị định của Chính phủ Việt Nam về bảo vệ dữ liệu cá nhân, có hiệu lực 1/7/2023 |
+
+# **Phụ lục B – Ghi chú về việc mở rộng sau MVP**
+
+Sau khi MVP đã ra mắt và có dữ liệu vận hành thực tế, có ba hướng mở rộng đáng cân nhắc:
+
+- Nâng cấp AR lên Cấp độ 3 (photo-realistic) nếu ngân sách cho phép và MVP đã chứng minh conversion rate tốt.
+
+- Mở rộng kho tri thức bác sĩ dựa trên câu hỏi thực tế của khách hàng (data-driven, không đoán mò).
+
+- Tận dụng log hội thoại của chatbot làm insight cho content marketing, TVC, và đào tạo sales – đây là tài sản chiến lược mà đối thủ không có.
+
+*--- Hết tài liệu ---*

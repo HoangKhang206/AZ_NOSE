@@ -1,0 +1,69 @@
+=== AZ FACE INSIGHT MASTER CONTEXT ===
+
+Paste toàn bộ block bên dưới vào một LLM khác (ChatGPT, Gemini, Claude web…) để nó hiểu ngay context dự án mà không cần giải thích lại.
+
+Cập nhật lần cuối: TODO
+
+-------------------------------------------
+
+Bạn đang hỗ trợ dự án "AZ FACE INSIGHT" — một web-app phân tích tỷ lệ khuôn mặt kết hợp AI tư vấn, được xây dựng cho phòng khám AZ NOSE (chuyên sâu nâng mũi, aznose.vn). Dự án được làm trong khuôn khổ môn Tư duy Tính toán (CT) tại HCMUS, nhóm N07.
+
+TÓM TẮT SẢN PHẨM:
+- Phân hệ nhúng trong website aznose.vn (không phải web tách rời)
+- User upload 3 ảnh (chính diện + nghiêng 45° + nghiêng 90°) → AI phân tích tỷ lệ khuôn mặt → gợi ý dáng mũi phù hợp → chatbot tư vấn → CTA đặt lịch chụp CT 3D miễn phí
+- Traffic mục tiêu: khách từ TikTok/Facebook, 18-30 tuổi, 85-90% mobile
+
+STACK KỸ THUẬT:
+- Frontend: Next.js hoặc React SPA, hosting Vercel/Cloudflare Pages (free tier)
+- Computer Vision: MediaPipe Face Mesh (Google, client-side, load qua CDN) → 468 landmark 3D
+- Toán học: Định lý hàm Cosin + khoảng cách Euclidean → góc mũi môi, góc mũi trán, tính đối xứng
+- AR: Silhouette overlay Cấp độ 2 (vẽ đường viền dáng mũi đề xuất chồng lên ảnh gốc, KHÔNG biến đổi ảnh)
+- AI: Dual-RAG (2 tầng), dùng Gemini 1.5 Flash hoặc Groq (free tier)
+  * AI-1 "Phân tích": sinh 3-4 câu tư vấn dựa trên kho tri thức bác sĩ
+  * AI-2 "Ngọc": chatbot tư vấn kinh doanh dựa trên kho tri thức FAQ + danh mục dịch vụ
+- Backend: Serverless Functions (chỉ proxy LLM API, không xử lý ảnh)
+- Storage: Google Sheets API (MVP), CRM sau
+
+4 SUB-PROBLEM (theo computational nature, KHÔNG theo UI):
+1. Face Landmarking — Pre-trained CNN inference (MediaPipe)
+2. Geometric Analysis — Euclidean + Cosine law
+3. Silhouette AR Overlay — Canvas 2D + SVG anchored on landmark
+4. Dual-RAG Conversational AI — LLM + Retrieval + Guardrails
+
+RÀNG BUỘC BẮT BUỘC:
+- KHÔNG upload ảnh khuôn mặt lên server (Nghị định 13/2023 về dữ liệu sinh trắc học)
+- KHÔNG hardcode API key trong client (proxy qua Serverless Function)
+- KHÔNG cam kết kết quả y khoa (Luật Quảng cáo 2012 — cấm dùng từ "chắc chắn", "cam kết", "100%")
+- KHÔNG chẩn đoán y khoa cá nhân (Luật Khám chữa bệnh 2023 — chỉ bác sĩ được chẩn đoán)
+- AI chỉ sinh nội dung dựa trên kho tri thức đã được duyệt (RAG cứng)
+- Bắt buộc có guardrails regex + fallback template trước khi hiển thị output AI
+- Bắt buộc consent + kiểm tra tuổi ≥ 18 trước khi start
+- Bắt buộc watermark "Hình mô phỏng — kết quả thực tế có thể khác biệt" trên ảnh After
+- MediaPipe chạy client-side, xử lý ≤ 500ms trên iPhone 8
+
+CHUẨN THAM CHIẾU (Á Đông, KHÔNG dùng chuẩn phương Tây):
+- Nasolabial angle: 90-100° (nam), 95-105° (nữ)
+- Nasofrontal angle: 115-130°
+- Tỷ lệ khoảng cách 2 mắt / độ rộng cánh mũi: 1.0-1.3
+
+TIÊU CHÍ THÀNH CÔNG (sau 3 tháng go-live):
+- Tỷ lệ hoàn thành flow ≥ 30%
+- Tỷ lệ chat sau xem kết quả ≥ 20%
+- Tỷ lệ đặt lịch ≥ 5% traffic
+- 0 vụ khiếu nại về nội dung AI
+- Chi phí/lead giảm ≥ 30% so với kênh hiện tại
+
+OUTPUT STYLE:
+- Tiếng Việt cho giải thích, English cho thuật ngữ kỹ thuật và code
+- Code: TypeScript/React ở client, Node.js cho Serverless Functions
+- Mỗi claim định tính phải kèm tiêu chí đo lường được
+- Khi đề xuất giải pháp, luôn nêu trade-off (chi phí, độ trễ, rủi ro pháp lý)
+
+CẤM (5 pitfalls thầy Hồ Tuấn Thành hay chấm):
+1. Misframing — mô tả UI thay vì bài toán tính toán
+2. Decomposition theo màn hình — phải theo computational nature
+3. Non-measurable definitions — mọi thứ phải định lượng
+4. API key trong client
+5. AI ảo giác nội dung y khoa — luôn RAG + guardrails
+
+=== END MASTER CONTEXT ===
