@@ -269,8 +269,6 @@ export async function POST(request: NextRequest) {
   } catch (err) {
     const errMsg = err instanceof Error ? err.message : 'unknown';
     console.error('[chat] Gemini error → fallback', { error: errMsg, latencyMs: Date.now() - t0 });
-    reply = `[DEBUG] Gemini lỗi: ${errMsg}`;
-    usedFallback = true;
   }
 
   console.log('[chat] complete', { latencyMs: Date.now() - t0, usedFallback });
