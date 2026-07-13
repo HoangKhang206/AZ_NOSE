@@ -34,8 +34,13 @@ const FALLBACK_MESSAGE =
 
 /* ── Guardrails ── */
 
-// Demo mode: guardrails tắt hoàn toàn — bật lại trước production
-const BLOCKED_PATTERNS: RegExp[] = [];
+const BLOCKED_PATTERNS: RegExp[] = [
+  /tôi cam kết|chúng tôi cam kết/i,
+  /chắc chắn.*(?:đẹp|thành công|an toàn)/i,
+  /100\s*%\s*(?:an toàn|thành công|không đau)/i,
+  /chữa khỏi/i,
+  /rẻ hơn.*(?:nơi khác|chỗ khác|phòng khám)/i,
+];
 
 function passesGuardrails(text: string): boolean {
   return BLOCKED_PATTERNS.every((p) => !p.test(text));
