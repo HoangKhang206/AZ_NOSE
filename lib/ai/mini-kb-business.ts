@@ -158,18 +158,18 @@ export const BUSINESS_KB: FAQ[] = [
  * (theo docs/references/knowledge_base_business.md section 6)
  */
 export const HANDOFF_TRIGGERS = [
-  // Đặt lịch cụ thể
-  /(?:đặt lịch|hẹn|khám).*(?:sáng mai|chiều nay|thứ|ngày|\d{1,2}[h:])/i,
-  // Số điện thoại / SĐT
-  /(?:sđt|điện thoại|số của tôi|liên hệ tôi)/i,
-  // Bệnh nền
-  /(?:tim mạch|tiểu đường|huyết áp|hen suyễn|dị ứng|đông máu)/i,
-  // Đã phẫu thuật trước
-  /(?:đã làm|phẫu thuật.*trước|sửa lại|hỏng.*trước)/i,
-  // Bức xúc
-  /(?:tệ|dở|kém|không hài lòng|báo báo chí|khiếu nại)/i,
-  // Dưới 18
-  /(?:tôi.*(?:1[0-7]|dưới 18)|con tôi.*(?:1[0-7]))/i,
+  // Đặt lịch có ngày/giờ cụ thể (phải có cả hai: động từ + thời điểm)
+  /(?:đặt lịch|book).*(?:sáng mai|chiều nay|thứ [2-7]|\d{1,2}\/\d{1,2}|\d{1,2}[h:])/i,
+  // User chủ động đưa số điện thoại của mình
+  /(?:sđt của tôi|số của tôi là|số điện thoại của tôi|gọi lại cho tôi)/i,
+  // Bệnh nền nghiêm trọng
+  /(?:tim mạch|tiểu đường|huyết áp cao|hen suyễn|rối loạn đông máu)/i,
+  // Đã phẫu thuật mũi trước đây, muốn sửa
+  /(?:mũi.*hỏng|sửa lại mũi|phẫu thuật.*lần trước|đã nâng.*trước)/i,
+  // Khiếu nại / bức xúc rõ ràng
+  /(?:khiếu nại|báo chí|kiện|không hài lòng.*dịch vụ)/i,
+  // Dưới 18 tuổi
+  /(?:tôi \d{1,2} tuổi|tôi.*(?:1[0-7]) tuổi|con tôi.*(?:1[0-7]) tuổi)/i,
 ];
 
 /**

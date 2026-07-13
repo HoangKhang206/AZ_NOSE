@@ -215,7 +215,7 @@ export async function POST(request: NextRequest) {
   }
 
   // ── 3. Kill switch AI-2 ──
-  if (process.env.FEATURE_AI2_ENABLED !== 'true') {
+  if (process.env.FEATURE_AI2_ENABLED === 'false') {
     console.log('[chat] AI-2 kill-switch active');
     return NextResponse.json(
       { reply: HANDOFF_REPLY, handoff: true, zaloLink: ZALO_LINK, usedFallback: true },
