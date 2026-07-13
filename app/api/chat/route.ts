@@ -21,7 +21,7 @@ import { withKeyRotation } from '@/lib/utils/geminiKeys';
 /* ── Constants ── */
 
 const MODEL_ID = 'gemini-2.5-flash'; // gemini-1.5-flash trả 404 với API key này
-const TIMEOUT_MS = 6_000;
+const TIMEOUT_MS = 9_000;
 
 const ZALO_LINK = process.env.NEXT_PUBLIC_ZALO_LINK ?? 'https://zalo.me/aznose';
 
@@ -35,12 +35,11 @@ const FALLBACK_MESSAGE =
 /* ── Guardrails ── */
 
 const BLOCKED_PATTERNS: RegExp[] = [
-  /chắc chắn/i,
-  /cam kết/i,
-  /100\s*%/,
-  /không đau/i,
+  /tôi cam kết|chúng tôi cam kết/i,   // cam kết tổ chức, không chặn "cam kết bảo hành"
+  /chắc chắn.*(?:đẹp|thành công|an toàn)/i, // chỉ chặn cam kết kết quả cụ thể
+  /100\s*%\s*(?:an toàn|thành công|không đau)/i, // chỉ chặn "100% an toàn/thành công"
   /chữa khỏi/i,
-  /rẻ hơn/i,
+  /rẻ hơn.*(?:nơi khác|chỗ khác|phòng khám)/i, // chỉ chặn so sánh giá với đối thủ
 ];
 
 function passesGuardrails(text: string): boolean {
