@@ -24,9 +24,16 @@ interface ProfileBand {
 }
 
 // Bands xếp từ cao xuống thấp; khớp với band đầu tiên thoả điều kiện ratio >= minRatio
+//
+// Ngưỡng được hiệu chỉnh theo tọa độ image-normalized của MediaPipe:
+// Mặt thường chiếm 35-60% chiều rộng ảnh nhưng 60-80% chiều cao → ratio thực tế
+// thấp hơn tỷ lệ cm thật (~0.78 oval) khoảng 10-25%. Do đó:
+//   ROUND   ≥ 0.70  (clinical ≥ 0.88, bù trừ framing ~80%)
+//   OVAL  0.55-0.70 (clinical 0.70-0.88)
+//   LONG    < 0.55  (clinical < 0.70)
 const PROFILE_BANDS: ProfileBand[] = [
-  { type: 'ROUND', minRatio: 0.85 },
-  { type: 'OVAL',  minRatio: 0.75 },
+  { type: 'ROUND', minRatio: 0.70 },
+  { type: 'OVAL',  minRatio: 0.55 },
   { type: 'LONG',  minRatio: 0.00 }, // catch-all
 ];
 

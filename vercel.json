@@ -1,0 +1,11 @@
+{
+  "regions": ["sin1"],
+  "functions": {
+    "app/api/analyze/route.ts": {
+      "maxDuration": 10
+    },
+    "app/api/chat/route.ts": {
+      "maxDuration": 10
+    }
+  }
+}

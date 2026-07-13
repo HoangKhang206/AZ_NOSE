@@ -83,6 +83,16 @@ export const MINI_KB: KnowledgeCase[] = [
     medicalNote: 'Mặt dài + góc thấp cần nâng nhẹ tạo điểm cân đối.',
   },
   {
+    id: 'case-11',
+    faceProfile: 'LONG',
+    nasolabialRange: [90, 105],
+    nasofrontalRange: [131, 150],
+    recommendedShape: 'L-line mềm với đỉnh nhẹ',
+    sampleAdvice:
+      'Khuôn mặt thon dài của bạn kết hợp với sống mũi khá dài tạo đường nét rõ ràng. Dáng L-line mềm có đỉnh nhẹ sẽ cân bằng tổng thể và làm mặt trông hài hoà hơn. Phân tích 2D chỉ là bước tham khảo đầu tiên — bác sĩ AZ NOSE sẽ tư vấn chi tiết qua CT 3D.',
+    medicalNote: 'Mặt dài + sống mũi cao → tránh nâng thêm, chỉ điều chỉnh độ cong nhẹ ở đỉnh.',
+  },
+  {
     id: 'case-07',
     faceProfile: 'SQUARE',
     nasolabialRange: [90, 105],
@@ -149,9 +159,17 @@ export function findMatchingCase(
 
   if (exactMatch) return exactMatch;
 
-  // Fallback: tìm case cùng faceProfile gần nhất
+  // Fallback: tìm case cùng faceProfile gần nhất theo khoảng cách góc
   const sameProfile = MINI_KB.filter((c) => c.faceProfile === faceProfile);
-  if (sameProfile.length > 0) return sameProfile[0];
+  if (sameProfile.length > 0) {
+    return sameProfile.reduce((best, c) => {
+      const distC = Math.max(0, c.nasolabialRange[0] - nasolabial, nasolabial - c.nasolabialRange[1])
+                  + Math.max(0, c.nasofrontalRange[0] - nasofrontal, nasofrontal - c.nasofrontalRange[1]);
+      const distBest = Math.max(0, best.nasolabialRange[0] - nasolabial, nasolabial - best.nasolabialRange[1])
+                     + Math.max(0, best.nasofrontalRange[0] - nasofrontal, nasofrontal - best.nasofrontalRange[1]);
+      return distC < distBest ? c : best;
+    });
+  }
 
   // Fallback cuối cùng: case oval chuẩn
   return MINI_KB.find((c) => c.id === 'case-04') || MINI_KB[0];

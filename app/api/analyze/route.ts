@@ -20,6 +20,7 @@ import {
   formatKBForPrompt,
   type FaceProfile,
 } from '@/lib/ai/mini-kb';
+import { withKeyRotation } from '@/lib/utils/geminiKeys';
 
 /* ── Constants ── */
 
@@ -119,30 +120,29 @@ async function callGemini(
   systemPrompt: string,
   userMessage: string,
 ): Promise<string> {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) throw new Error('GEMINI_API_KEY không được cấu hình.');
+  return withKeyRotation(async (apiKey) => {
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({
+      model: MODEL_ID,
+      systemInstruction: systemPrompt,
+      generationConfig: {
+        temperature: 0.7,
+        maxOutputTokens: 1024,
+      },
+    });
 
-  const genAI = new GoogleGenerativeAI(apiKey);
-  const model = genAI.getGenerativeModel({
-    model: MODEL_ID,
-    systemInstruction: systemPrompt,
-    generationConfig: {
-      temperature: 0.7,
-      maxOutputTokens: 1024,
-    },
+    const geminiCall = model
+      .generateContent({
+        contents: [{ role: 'user', parts: [{ text: userMessage }] }],
+      })
+      .then((result) => result.response.text());
+
+    const timeout = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error(`Gemini timeout sau ${TIMEOUT_MS}ms`)), TIMEOUT_MS),
+    );
+
+    return Promise.race([geminiCall, timeout]);
   });
-
-  const geminiCall = model
-    .generateContent({
-      contents: [{ role: 'user', parts: [{ text: userMessage }] }],
-    })
-    .then((result) => result.response.text());
-
-  const timeout = new Promise<never>((_, reject) =>
-    setTimeout(() => reject(new Error(`Gemini timeout sau ${TIMEOUT_MS}ms`)), TIMEOUT_MS),
-  );
-
-  return Promise.race([geminiCall, timeout]);
 }
 
 /* ── CORS ── */

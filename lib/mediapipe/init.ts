@@ -101,7 +101,7 @@ export async function getFaceMesh(): Promise<FaceMeshInstance> {
 
     mesh.setOptions({
       maxNumFaces: 1,
-      refineLandmarks: true,
+      refineLandmarks: false,
       minDetectionConfidence: 0.5,
       minTrackingConfidence: 0.5,
     });

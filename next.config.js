@@ -8,14 +8,14 @@ const cspHeader = `
   style-src 'self' 'unsafe-inline';
   img-src 'self' data: blob: *.aznose.vn;
   media-src 'self' blob:;
-  connect-src 'self' *.googleapis.com *.facebook.com *.clarity.ms *.google-analytics.com;
+  connect-src 'self' cdn.jsdelivr.net *.googleapis.com *.facebook.com *.clarity.ms *.google-analytics.com;
   worker-src 'self' blob:;
   frame-ancestors 'none';
   form-action 'self';
 `.replace(/\s{2,}/g, ' ').trim();
 
 const nextConfig = {
-  reactStrictMode: true,
+  reactStrictMode: false, // MediaPipe WASM không tương thích với Strict Mode double-mount
 
   // Headers bảo mật cho toàn bộ route
   async headers() {

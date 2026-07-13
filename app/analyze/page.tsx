@@ -75,7 +75,7 @@ export default function AnalyzePage() {
     <main className="min-h-screen bg-neutral-50">
       {/* ── Header ── */}
       <header className="sticky top-0 z-10 bg-white border-b border-neutral-100 shadow-sm">
-        <div className="max-w-3xl mx-auto px-4 h-14 flex items-center justify-between">
+        <div className="max-w-[1200px] mx-auto px-4 h-14 flex items-center justify-between">
           <span className="text-sm font-bold text-brand-500 tracking-tight">
             AZ FACE INSIGHT
           </span>
@@ -104,7 +104,7 @@ export default function AnalyzePage() {
       {errorMsg && (
         <div
           role="alert"
-          className="max-w-3xl mx-auto mt-4 mx-4 px-4 py-3 rounded-xl bg-red-50 border border-red-200 text-sm text-red-700"
+          className="max-w-[1200px] mx-auto mt-4 px-4 py-3 rounded-xl bg-red-50 border border-red-200 text-sm text-red-700"
         >
           {errorMsg}
         </div>
@@ -112,7 +112,9 @@ export default function AnalyzePage() {
 
       {/* ── Flow steps ── */}
       {flow === 'INPUT' && (
-        <InputZone onStart={handleStart} />
+        <div className="max-w-[1200px] mx-auto px-4 md:px-6 py-6">
+          <InputZone onStart={handleStart} />
+        </div>
       )}
 
       {flow === 'PROCESSING' && images && (

@@ -92,13 +92,17 @@ export default function InputZone({ onStart }: InputZoneProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const slotsRef = useRef(slots);
   slotsRef.current = slots;
+  // Khi onStart được gọi, blob URLs đã được handoff → không revoke khi unmount
+  const handedOffRef = useRef(false);
 
-  // Revoke all blob URLs on unmount
+  // Revoke all blob URLs on unmount (chỉ khi chưa handoff)
   useEffect(() => {
     return () => {
-      Object.values(slotsRef.current).forEach((s) => {
-        if (s.blobUrl) URL.revokeObjectURL(s.blobUrl);
-      });
+      if (!handedOffRef.current) {
+        Object.values(slotsRef.current).forEach((s) => {
+          if (s.blobUrl) URL.revokeObjectURL(s.blobUrl);
+        });
+      }
     };
   }, []);
 
@@ -186,6 +190,7 @@ export default function InputZone({ onStart }: InputZoneProps) {
 
   function handleStart() {
     if (!canStart) return;
+    handedOffRef.current = true;
     onStart({
       front: slots.front.blobUrl!,
       angle45: slots.angle45.blobUrl,

@@ -12,6 +12,9 @@ import { calculateNasolabial, calculateNasofrontal } from '@/lib/geometry/angles
 import { classifyProfile } from '@/lib/geometry/faceProfile';
 import { findMatchingCase, type KnowledgeCase, type FaceProfile } from '@/lib/ai/mini-kb';
 import type { LandmarkResult } from '@/lib/mediapipe/landmarks';
+import BeforeAfterSlider from './BeforeAfterSlider';
+import Chatbot from './Chatbot';
+import PopupCTA from './PopupCTA';
 
 /* ── Config ── */
 
@@ -153,104 +156,114 @@ export default function Dashboard({ landmarks, image, onFinish }: DashboardProps
     onFinish();
   }, [onFinish]);
 
+  /* ── Chat count — trigger PopupCTA sau 3 lượt ── */
+  const [chatCount, setChatCount] = useState(0);
+  const handleUserMessage = useCallback(() => setChatCount((c) => c + 1), []);
+
   /* ── Derived display values ── */
   const nasolabial  = measurements?.nasolabial  ?? 0;
   const nasofrontal = measurements?.nasofrontal ?? 0;
   const faceProfile = measurements?.faceProfile ?? 'OVAL';
 
   /* ══════════════════════════════ RENDER ══════════════════════════════ */
-  return (
-    <div className="w-full max-w-3xl mx-auto px-4 py-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
 
-        {/* ── Left: image + AR placeholder ── */}
-        <div className="flex flex-col gap-3">
-          <div
-            className="relative w-full overflow-hidden rounded-2xl bg-neutral-100 shadow-md"
-            style={{ aspectRatio: '4 / 5' }}
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={image}
-              alt="Ảnh khuôn mặt"
-              className="absolute inset-0 w-full h-full object-cover"
-            />
-            {/* AR silhouette overlay — Sprint ngày 2 */}
-            <div className="absolute inset-0 flex items-end justify-center pb-3 pointer-events-none">
-              <span className="bg-black/40 backdrop-blur-sm text-white text-[10px] px-2.5 py-1 rounded-full">
-                AR silhouette — sắp ra mắt
+  /* Metric cards dùng ở cả mobile và desktop — extract để tránh lặp JSX */
+  const metricCards = (
+    <div className="grid grid-cols-2 gap-3">
+      <MetricCard
+        label="Góc mũi môi"
+        value={nasolabial}
+        standard="90–100°"
+        inRange={nasolabial >= NASOLABIAL_STANDARD[0] && nasolabial <= NASOLABIAL_STANDARD[1]}
+      />
+      <MetricCard
+        label="Góc mũi trán"
+        value={nasofrontal}
+        standard="115–130°"
+        inRange={nasofrontal >= NASOFRONTAL_STANDARD[0] && nasofrontal <= NASOFRONTAL_STANDARD[1]}
+      />
+    </div>
+  );
+
+  const adviceBox = (
+    <div className="rounded-2xl bg-brand-50 border border-brand-100 p-4 min-h-[96px]">
+      {isLoading ? (
+        <AdviceSkeleton />
+      ) : (
+        <>
+          <div className="flex items-center justify-between mb-2.5">
+            <span className="text-[11px] font-bold text-brand-500 uppercase tracking-wider">
+              Tư vấn AI
+            </span>
+            {usedFallback && IS_DEV && (
+              <span className="text-[10px] font-medium text-amber-700 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded">
+                Bản mẫu
               </span>
-            </div>
-          </div>
-
-          {/* Cấu trúc mặt label dưới ảnh */}
-          <div className="flex items-center justify-center gap-2 text-sm text-neutral-500">
-            <FaceIcon />
-            <span>{PROFILE_LABEL[faceProfile]}</span>
-          </div>
-        </div>
-
-        {/* ── Right: metrics + advice ── */}
-        <div className="flex flex-col gap-5">
-          <h2 className="text-xl font-bold text-neutral-900 leading-snug">
-            Báo cáo tỷ lệ khuôn mặt
-          </h2>
-
-          {/* Metric cards — 2 col */}
-          <div className="grid grid-cols-2 gap-3">
-            <MetricCard
-              label="Góc mũi môi"
-              value={nasolabial}
-              standard="90–100°"
-              inRange={
-                nasolabial >= NASOLABIAL_STANDARD[0] &&
-                nasolabial <= NASOLABIAL_STANDARD[1]
-              }
-            />
-            <MetricCard
-              label="Góc mũi trán"
-              value={nasofrontal}
-              standard="115–130°"
-              inRange={
-                nasofrontal >= NASOFRONTAL_STANDARD[0] &&
-                nasofrontal <= NASOFRONTAL_STANDARD[1]
-              }
-            />
-          </div>
-
-          {/* AI advice */}
-          <div className="rounded-2xl bg-brand-50 border border-brand-100 p-4 min-h-[96px]">
-            {isLoading ? (
-              <AdviceSkeleton />
-            ) : (
-              <>
-                <div className="flex items-center justify-between mb-2.5">
-                  <span className="text-[11px] font-bold text-brand-500 uppercase tracking-wider">
-                    Tư vấn AI
-                  </span>
-                  {/* Badge "Bản mẫu" — chỉ hiện trong dev */}
-                  {usedFallback && IS_DEV && (
-                    <span className="text-[10px] font-medium text-amber-700 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded">
-                      Bản mẫu
-                    </span>
-                  )}
-                </div>
-                <p className="text-sm leading-relaxed text-neutral-700">
-                  {displayedText}
-                  {isTyping && (
-                    <span className="inline-block w-0.5 h-[14px] bg-brand-400 ml-0.5 animate-pulse align-middle" />
-                  )}
-                </p>
-              </>
             )}
           </div>
+          <p className="text-sm leading-relaxed text-neutral-700">
+            {displayedText}
+            {isTyping && (
+              <span className="inline-block w-0.5 h-[14px] bg-brand-400 ml-0.5 animate-pulse align-middle" />
+            )}
+          </p>
+        </>
+      )}
+    </div>
+  );
 
-          {/* Recommended shape card */}
-          {matchedCase && (
-            <ShapeCard matchedCase={matchedCase} />
-          )}
+  const sliderBlock = (
+    <div className="flex flex-col gap-3">
+      <BeforeAfterSlider image={image} landmarks={landmarks} />
+      <div className="flex items-center justify-center gap-2 text-sm text-neutral-500">
+        <FaceIcon />
+        <span>{PROFILE_LABEL[faceProfile]}</span>
+      </div>
+    </div>
+  );
 
-          {/* CTA */}
+  return (
+    <div className="w-full max-w-[1200px] mx-auto px-4 md:px-6 py-6 md:py-8">
+
+      {/* ═══ MOBILE ONLY: Metric cards at very top ═══ */}
+      <div className="md:hidden mb-5">
+        <h2 className="text-xl font-bold text-neutral-900 mb-4 leading-snug">
+          Báo cáo tỷ lệ khuôn mặt
+        </h2>
+        {metricCards}
+      </div>
+
+      {/* ═══ MAIN GRID ═══ */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 items-start">
+
+        {/* ── Desktop LEFT: sticky slider ── */}
+        <div className="hidden md:block sticky top-4 self-start">
+          {sliderBlock}
+        </div>
+
+        {/* ── Right column (desktop) / Full column (mobile) ── */}
+        <div className="flex flex-col gap-5">
+
+          {/* Desktop: h2 + metrics (hidden on mobile — shown at top instead) */}
+          <div className="hidden md:flex flex-col gap-4">
+            <h2 className="text-xl font-bold text-neutral-900 leading-snug">
+              Báo cáo tỷ lệ khuôn mặt
+            </h2>
+            {metricCards}
+          </div>
+
+          {/* Mobile: slider between metrics and advice */}
+          <div className="md:hidden">
+            {sliderBlock}
+          </div>
+
+          {/* AI advice — all sizes */}
+          {adviceBox}
+
+          {/* Shape card — all sizes */}
+          {matchedCase && <ShapeCard matchedCase={matchedCase} />}
+
+          {/* CTA — all sizes */}
           <button
             type="button"
             onClick={handleCTA}
@@ -260,6 +273,36 @@ export default function Dashboard({ landmarks, image, onFinish }: DashboardProps
           </button>
         </div>
       </div>
+
+      {/* ═══ CASE TƯƠNG TỰ — full width, dưới grid ═══ */}
+      <div className="mt-10 md:mt-14">
+        <h3 className="text-base font-bold text-neutral-900 mb-4">Case tương tự bạn</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <SimilarCasePlaceholder
+            n={1} shape="S-line tự nhiên" profile="Mặt oval" angle={95} recovery={8}
+          />
+          <SimilarCasePlaceholder
+            n={2} shape="S-line nâng" profile="Mặt tròn" angle={87} recovery={10}
+          />
+          <SimilarCasePlaceholder
+            n={3} shape="Natural tip" profile="Mặt dài" angle={102} recovery={7}
+          />
+        </div>
+      </div>
+
+      {/* ── Chatbot floating panel ── */}
+      <Chatbot
+        context={{
+          faceProfile: PROFILE_LABEL[faceProfile],
+          recommendedShape: matchedCase?.recommendedShape ?? 'S-line tự nhiên',
+          nasolabial,
+          nasofrontal,
+        }}
+        onUserMessage={handleUserMessage}
+      />
+
+      {/* ── PopupCTA: sau 30s HOẶC sau 3 lượt chat ── */}
+      <PopupCTA chatCount={chatCount} />
     </div>
   );
 }
@@ -295,6 +338,48 @@ function MetricCard({ label, value, standard, inRange }: MetricCardProps) {
       </p>
       <p className="mt-1 text-[11px] text-neutral-400">Chuẩn: {standard}</p>
     </div>
+  );
+}
+
+interface SimilarCasePlaceholderProps {
+  n: number;
+  shape: string;
+  profile: string;
+  angle: number;
+  recovery: number;
+}
+
+function SimilarCasePlaceholder({ n, shape, profile, angle, recovery }: SimilarCasePlaceholderProps) {
+  return (
+    <div className="rounded-2xl overflow-hidden border border-neutral-200 bg-white">
+      {/* Before / After placeholder thumbnails */}
+      <div className="grid grid-cols-2 gap-px bg-neutral-200">
+        <div className="aspect-[4/5] bg-neutral-100 flex flex-col items-center justify-center gap-1.5">
+          <ImagePlaceholderIcon color="#a3a3a3" />
+          <span className="text-[10px] text-neutral-400">Trước</span>
+        </div>
+        <div className="aspect-[4/5] bg-brand-50 flex flex-col items-center justify-center gap-1.5">
+          <ImagePlaceholderIcon color="#D85A30" />
+          <span className="text-[10px] text-brand-400">Sau</span>
+        </div>
+      </div>
+      <div className="px-3 py-2.5">
+        <p className="text-xs font-bold text-neutral-800">Case #{n} · {shape}</p>
+        <p className="text-[11px] text-neutral-400 mt-0.5">
+          {profile} · Góc mũi môi {angle}° · Hồi phục {recovery} ngày
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function ImagePlaceholderIcon({ color = '#a3a3a3' }: { color?: string }) {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="3" y="3" width="18" height="18" rx="3" />
+      <circle cx="8.5" cy="8.5" r="1.5" />
+      <polyline points="21 15 16 10 5 21" />
+    </svg>
   );
 }
 

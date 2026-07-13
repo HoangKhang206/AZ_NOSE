@@ -21,6 +21,15 @@ export function euclidean(p1: Point, p2: Point): number {
   return Math.sqrt((p2.x - p1.x) ** 2 + (p2.y - p1.y) ** 2);
 }
 
+/** Khoảng cách Euclidean với z tùy chọn — z = 0 nếu không có (tương đương euclidean 2D) */
+export function euclideanZ(
+  p1: { x: number; y: number; z?: number },
+  p2: { x: number; y: number; z?: number },
+): number {
+  const dz = (p2.z ?? 0) - (p1.z ?? 0);
+  return Math.sqrt((p2.x - p1.x) ** 2 + (p2.y - p1.y) ** 2 + dz * dz);
+}
+
 /**
  * Khoảng cách Euclidean 3D — dùng khi cần tính toán có z-depth
  * Lưu ý: z từ MediaPipe Face Mesh là depth tương đối, KHÔNG phải khoảng cách thật.
